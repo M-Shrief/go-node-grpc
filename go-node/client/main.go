@@ -26,6 +26,17 @@ func ping(client pb.ServicesClient) {
 	log.Printf("%s", res.Message)
 }
 
+func sum(client pb.ServicesClient) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	res, err := client.Sum(ctx, &pb.SumRequest{FirstNumber: 1, SecondNumber: 2})
+	if err != nil {
+		log.Fatalf("Couldn't Sum : %v", err)
+	}
+	log.Printf("Sum is: %v", res.SumResult)
+}
+
 func main() {
 	con, err := grpc.Dial("localhost"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -36,4 +47,5 @@ func main() {
 	client := pb.NewServicesClient(con)
 
 	ping(client)
+	sum(client)
 }

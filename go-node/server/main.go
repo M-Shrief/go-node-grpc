@@ -22,6 +22,14 @@ func (s *server) PingPong(ctx context.Context, req *pb.PingRequest) (*pb.PongRes
 	return &pb.PongResponse{Message: "Pong"}, nil
 }
 
+func (s *server) Sum(ctx context.Context, req *pb.SumRequest) (*pb.SumResponse, error) {
+	firstNum, secNum := req.GetFirstNumber(), req.GetSecondNumber()
+	log.Printf("FirstNum: %v, SecNum: %v", firstNum, secNum)
+	sum := firstNum + secNum
+	log.Printf("Sum is: %v", sum)
+	return &pb.SumResponse{SumResult: sum}, nil
+}
+
 func main() {
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
