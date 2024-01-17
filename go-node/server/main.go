@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"go-node/pb"
+	"io"
 	"log"
 	"net"
 
@@ -28,6 +29,29 @@ func (s *server) Sum(ctx context.Context, req *pb.SumRequest) (*pb.SumResponse, 
 	sum := firstNum + secNum
 	log.Printf("Sum is: %v", sum)
 	return &pb.SumResponse{SumResult: sum}, nil
+}
+
+func (s *server) ComputeAverage(stream pb.Services_ComputeAverageServer) error {
+	log.Println("Starting Computing the Average...")
+
+	sum := int32(0)
+	count := 0
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			average := float64(sum) / float64(count)
+			log.Printf("Average is: %v", average)
+			return stream.SendAndClose(&pb.ComputeAverageResponse{Average: average})
+
+		}
+		if err != nil {
+			log.Fatalf("Error while reading client stream: %v", err)
+		}
+		log.Printf("Receiving: %v", req.GetNumber())
+		sum += req.GetNumber()
+		count++
+	}
 }
 
 func main() {

@@ -7,6 +7,8 @@ import { SumRequest__Output } from './pb/services/SumRequest'
 import { SumResponse } from './pb/services/SumResponse'
 import { PingRequest__Output } from './pb/services/PingRequest'
 import { PongResponse } from './pb/services/PongResponse'
+import { ComputeAverageRequest__Output } from './pb/services/ComputeAverageRequest'
+import { ComputeAverageResponse } from './pb/services/ComputeAverageResponse'
 const PROTO_FILE = '../../proto/services.proto'
 const packageDefinition = protoLoader.loadSync(
     path.resolve(__dirname, PROTO_FILE),   
@@ -59,7 +61,23 @@ function newServer() {
             const sum_result = first_number + second_number
             console.log(`Sum = ${sum_result}`)
             res(null, {sum_result})
-        }
+        },
+        ComputeAverage: (
+            req: grpc.ServerReadableStream<ComputeAverageRequest__Output, ComputeAverageResponse>,
+            res: grpc.sendUnaryData<ComputeAverageResponse>
+        ) => {
+            let sum = 0, count = 0;
+            req
+            .on("data", (req: ComputeAverageRequest__Output) => {
+                console.log(`Received: ${req.number}`)
+                sum += req.number
+                count++
+            })
+            .on("end", () => {
+                let average = sum / count;
+                res(null, {average})
+            })
+        },
     })
 
 

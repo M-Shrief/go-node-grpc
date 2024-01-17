@@ -37,6 +37,26 @@ func sum(client pb.ServicesClient) {
 	log.Printf("Sum is: %v", res.SumResult)
 }
 
+func computeAverage(client pb.ServicesClient) {
+	log.Println("Starting to do a ComputeAverage Client Streaming RPC...")
+
+	stream, err := client.ComputeAverage(context.Background())
+	if err != nil {
+		log.Fatalf("Error while opening stream: %v", err)
+	}
+
+	for _, number := range []int32{1, 2, 3, 4, 5} {
+		log.Printf("Sending number: %v\n", number)
+		stream.Send(&pb.ComputeAverageRequest{Number: number})
+	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error while receiving response: %v", err)
+	}
+	log.Printf("The Average is: %v\n", res.GetAverage())
+}
+
 func main() {
 	con, err := grpc.Dial("localhost"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -48,4 +68,5 @@ func main() {
 
 	ping(client)
 	sum(client)
+	computeAverage(client)
 }

@@ -59,4 +59,18 @@ function onReady() {
             console.log(result)
         }
     )
+
+    const call = client.computeAverage((err, res) => {
+        if(err) {
+            console.error(err);
+            return
+        }+
+        console.log(res)
+    })
+    
+    for(let number of [1,2,3,4,5]) {
+        call.write({number})
+    }
+
+    call.end()
 }
