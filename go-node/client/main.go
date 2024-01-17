@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"go-node/pb"
+	"io"
 	"log"
 	"time"
 
@@ -57,6 +58,27 @@ func computeAverage(client pb.ServicesClient) {
 	log.Printf("The Average is: %v\n", res.GetAverage())
 }
 
+func primeNumberDecomposition(client pb.ServicesClient) {
+	log.Println("Starting to do a PrimeDecomposition Server Streaming RPC...")
+	req := &pb.PrimeNumberDecompositionRequest{Number: 12390392840}
+
+	stream, err := client.PrimeNumberDecomposition(context.Background(), req)
+	if err != nil {
+		log.Fatalf("error while calling PrimeDecomposition RPC: %v", err)
+	}
+
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
+		log.Printf("Prime Factor: %v", res.GetPrimeFactor())
+	}
+}
+
 func main() {
 	con, err := grpc.Dial("localhost"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -69,4 +91,6 @@ func main() {
 	ping(client)
 	sum(client)
 	computeAverage(client)
+	primeNumberDecomposition(client)
+
 }

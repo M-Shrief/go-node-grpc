@@ -4,6 +4,7 @@ import * as grpc from '@grpc/grpc-js'
 import * as protoLoader from '@grpc/proto-loader'
 // Interfaces
 import {ProtoGrpcType} from './pb/services'
+import { PrimeNumberDecompositionResponse__Output } from './pb/services/PrimeNumberDecompositionResponse'
 
 const PORT = 8080
 const PROTO_FILE = '../../proto/services.proto'
@@ -73,4 +74,17 @@ function onReady() {
     }
 
     call.end()
+
+    const call2 = client.primeNumberDecomposition({number: 12390392840})
+
+    call2
+    .on('data', (chunk: PrimeNumberDecompositionResponse__Output) => {
+        console.log(chunk)
+    })
+    .on('end', () => {
+        console.log("Communication ended successfully");
+    })
+    .on("error", (err) => {
+        console.error(err)
+    })
 }

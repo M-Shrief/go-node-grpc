@@ -9,6 +9,8 @@ import { PingRequest__Output } from './pb/services/PingRequest'
 import { PongResponse } from './pb/services/PongResponse'
 import { ComputeAverageRequest__Output } from './pb/services/ComputeAverageRequest'
 import { ComputeAverageResponse } from './pb/services/ComputeAverageResponse'
+import { PrimeNumberDecompositionRequest__Output } from './pb/services/PrimeNumberDecompositionRequest'
+import { PrimeNumberDecompositionResponse } from './pb/services/PrimeNumberDecompositionResponse'
 const PROTO_FILE = '../../proto/services.proto'
 const packageDefinition = protoLoader.loadSync(
     path.resolve(__dirname, PROTO_FILE),   
@@ -52,6 +54,7 @@ function newServer() {
             console.log(req.request);
             res(null, {message: "Pong"})
         },
+
         Sum: (
             req: grpc.ServerUnaryCall<SumRequest__Output, SumResponse>,
             res: grpc.sendUnaryData<SumResponse>
@@ -62,6 +65,7 @@ function newServer() {
             console.log(`Sum = ${sum_result}`)
             res(null, {sum_result})
         },
+
         ComputeAverage: (
             req: grpc.ServerReadableStream<ComputeAverageRequest__Output, ComputeAverageResponse>,
             res: grpc.sendUnaryData<ComputeAverageResponse>
@@ -77,6 +81,31 @@ function newServer() {
                 let average = sum / count;
                 res(null, {average})
             })
+        },
+
+        PrimeNumberDecomposition: (
+            stream: grpc.ServerWritableStream<PrimeNumberDecompositionRequest__Output, PrimeNumberDecompositionResponse>
+        ) => {
+            let number = Number(stream.request.number)
+            let divisor = 2;
+
+            console.log(number)
+
+            while (number > 1) {
+                if (number % divisor == 0) {
+                    stream.write({prime_factor: divisor})
+                    number = number / divisor
+                } else {
+                    divisor++
+                    console.log(`Divisor has increased to ${divisor}\n`)
+                }
+            }
+            stream.on('finish', () => {
+                console.log(divisor)
+                stream.write({prime_factor: divisor})
+            })
+            stream.end()
+            return
         },
     })
 

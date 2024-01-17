@@ -10,6 +10,8 @@ service Services {
     rpc Sum(SumRequest) returns (SumResponse) {};
 
     rpc ComputeAverage(stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+
+    rpc PrimeNumberDecomposition(PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse) {};
 }
 
 // PingPong
@@ -38,4 +40,13 @@ message ComputeAverageRequest {
 
 message ComputeAverageResponse {
     double average = 1;
+}
+
+// PrimeNumberDecomposition
+message PrimeNumberDecompositionRequest {
+    int64 number = 1;
+}
+
+message PrimeNumberDecompositionResponse {
+    int64 prime_factor = 1;
 }
