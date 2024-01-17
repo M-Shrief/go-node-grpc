@@ -8,7 +8,16 @@ import { SumResponse } from './pb/services/SumResponse'
 import { PingRequest__Output } from './pb/services/PingRequest'
 import { PongResponse } from './pb/services/PongResponse'
 const PROTO_FILE = '../../proto/services.proto'
-const packageDefinition = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
+const packageDefinition = protoLoader.loadSync(
+    path.resolve(__dirname, PROTO_FILE),   
+    {
+        keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true
+    }
+   )
 const gRpcObj = (grpc.loadPackageDefinition(packageDefinition) as unknown) as ProtoGrpcType
 const service  = gRpcObj.services.Services.service
 
@@ -41,6 +50,16 @@ function newServer() {
             console.log(req.request);
             res(null, {message: "Pong"})
         },
+        Sum: (
+            req: grpc.ServerUnaryCall<SumRequest__Output, SumResponse>,
+            res: grpc.sendUnaryData<SumResponse>
+        ) => {
+            const {first_number, second_number}  = req.request;
+            console.log('Received:', {first_number, second_number})
+            const sum_result = first_number + second_number
+            console.log(`Sum = ${sum_result}`)
+            res(null, {sum_result})
+        }
     })
 
 

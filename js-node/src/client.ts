@@ -8,7 +8,16 @@ import {ProtoGrpcType} from './pb/services'
 const PORT = 8080
 const PROTO_FILE = '../../proto/services.proto'
 
-const packageDefinition = protoLoader.loadSync(path.resolve(__dirname, PROTO_FILE))
+const packageDefinition = protoLoader.loadSync(
+    path.resolve(__dirname, PROTO_FILE),
+    {
+        keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true
+    }
+    )
 const gRPCObj = (grpc.loadPackageDefinition(packageDefinition) as unknown) as ProtoGrpcType
 
 const client = new gRPCObj.services.Services(`0.0.0.0:${PORT}`, grpc.credentials.createInsecure());
@@ -35,8 +44,19 @@ function onReady() {
             if(err) {
                 console.error(err);
                 return
-            }+
+            }
             console.log(result)
         }       
+    )
+
+    client.Sum(
+        {first_number: 1, second_number: 2},
+        (err, result) => {
+            if(err) {
+                console.error(err);
+                return
+            }
+            console.log(result)
+        }
     )
 }
